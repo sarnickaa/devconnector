@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const gravatar = require('gravatar')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const keys = require('../../config/keys.js')
 
 // load User model
 const User = require('../../models/User.js')
@@ -60,4 +62,54 @@ router.post('/register', (req, res) => {
   })
   .catch()
 })
+
+// @route   GET api/users/login
+// @desc    Login user - returning JWT token
+// @access  Public
+router.post('/login', (req, res) => {
+  const email = req.body.email
+  const password = req.body.password
+
+  // find user with their email
+  // User.findOne({email: email})
+  User.findOne({email})
+    .then(user => {
+      if(!user) {
+        return res.status(404).json({email: 'user email not found'})
+        //the json object attribute is important here as it will be used on the front end later
+      }
+
+      // check password - password that user types in against the hashed saved password on the user record
+      bcrypt.compare(password, user.password)
+      .then(isMatch => {
+        //check for match
+        if(isMatch) {
+          // user matched
+          // sign the token - takes payload of user info to include the token + secret/key + expiration
+
+          // create jwt payload
+          const payload = {
+            id: user.id,
+            name: user.name,
+            avatar: user.avatar
+          }
+
+          jwt.sign(
+            payload,
+            keys.secretOrKey,
+            { expiresIn: 3600 },
+            (err, token) => {
+              res.json({
+                success: true,
+                token: 'Bearer ' + token
+              })
+            })
+          // token will expire in an hour - user will have to log in again
+        } else {
+          return res.status(400).json({password: 'password incorrect'})
+        }
+    })
+  })
+})
+
 module.exports = router
