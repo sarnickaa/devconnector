@@ -6,6 +6,11 @@ const jwt = require('jsonwebtoken')
 const keys = require('../../config/keys.js')
 const passport = require('passport')
 
+//load input validation
+const validateRegisterInput = require('../../validation/register.js')
+const validateLoginInput = require('../../validation/login.js')
+
+
 // load User model
 const User = require('../../models/User.js')
 
@@ -18,14 +23,37 @@ router.get('/test', (req, res) => res.json({msg: "users works"}))
 // @desc    register user
 // @access  Public
 router.post('/register', (req, res) => {
+// before the POST request (or any request that takes in data from the user) runs - pull out errors & isValid from validateRegisterInput function through destructuring
+// destructuring: unpacks the values assigned to the keys into matching variables
+  // validateRegisterInput() returns an object with keys errors, isValid
+  // const { errors, isValid } = validateRegisterInput = that object = assigns those values to the variables
+// runs validateRegisterInput function on everything that is sent to this route
+// THEN pulls out the errors/isValid objects and check them to see if user input passed validation before starting POST request
+const { errors, isValid } = validateRegisterInput(req.body)
+console.log(isValid) // will return true or false - if error object is empty - will be set to true
+console.log(errors)
+
+//check first line of validation - is the input itself valid before checking against database below
+if(!isValid) {
+  // IF NOT VALID/NOT TRUE - this means there are errors
+  return res.status(400).json(errors) // sending whole errors object - if validation fails - this object will be filled with the erros defined in validation function
+}
+
+
   // check to see that email doesn't already exist
   User.findOne({ email: req.body.email })
   // requiring bodyParser in server.js allows access to req.body
   // returns a promise that must be resolved
   .then(user => {
     if(user) {
+      errors.email = 'email already exists'
+      //errors object from above. Because validation passed - object is empty
+      // assign 'email' as a key and set error message as its value
+
       // if email exists - send a custom error
-      return res.status(400).json({email: 'email already exists'})
+      console.log(errors)
+      return res.status(400).json(errors) // errors at this point is object with 1 key {email: 'error message'}
+
     } else {
 
       // create an avatar by using a gravatar email
@@ -68,6 +96,15 @@ router.post('/register', (req, res) => {
 // @desc    Login user - returning JWT token
 // @access  Public
 router.post('/login', (req, res) => {
+
+  const { errors, isValid } = validateLoginInput(req.body)
+
+  //check first line of validation - is the input itself valid before checking against database below
+  if(!isValid) {
+    // IF NOT VALID or any errors
+    return res.status(400).json(errors) // sending whole errors object - if validation fails - this object will be filled with the erros defined in validation function
+  }
+
   const email = req.body.email
   const password = req.body.password
 
@@ -76,7 +113,8 @@ router.post('/login', (req, res) => {
   User.findOne({email})
     .then(user => {
       if(!user) {
-        return res.status(404).json({email: 'user email not found'})
+        errors.email = "User not found"
+        return res.status(404).json(errors)
         //the json object attribute is important here as it will be used on the front end later
       }
 
@@ -110,7 +148,8 @@ router.post('/login', (req, res) => {
               })
             })
         } else {
-          return res.status(400).json({password: 'password incorrect'})
+          errors.password = 'password incorrect'
+          return res.status(400).json(errors)
         }
     })
   })

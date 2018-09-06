@@ -1,0 +1,12 @@
+const isEmpty = value => {
+  return(
+    value === undefined ||
+    value === null ||
+    (typeof value === 'object' && Object.keys(value).length === 0) ||
+    //Object.keys(value).length === 0 checks for empty object i.e. number of keys on value(object) is 0
+    (typeof value === 'string' && value.trim().length === 0)
+    //checks for empty string
+  )
+}
+
+module.exports = isEmpty
