@@ -4,6 +4,7 @@ const gravatar = require('gravatar')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const keys = require('../../config/keys.js')
+const passport = require('passport')
 
 // load User model
 const User = require('../../models/User.js')
@@ -53,7 +54,7 @@ router.post('/register', (req, res) => {
           // sets the users password as the hash
 
           newUser.save()
-          // mongoose saves an instance of the newUser to the collection
+          // mongoose saves an instance of the newUser to the collection with a hashed password
             .then(user => res.json(user))
             .catch(err => console.log(err))
         })
@@ -85,30 +86,47 @@ router.post('/login', (req, res) => {
         //check for match
         if(isMatch) {
           // user matched
-          // sign the token - takes payload of user info to include the token + secret/key + expiration
 
-          // create jwt payload
+          // create jwt payload to send to jwtStrategy for token generation
           const payload = {
             id: user.id,
             name: user.name,
             avatar: user.avatar
           }
 
+          // sign the token(make the token)- takes payload of user info to include the token + secret/key + expiration
           jwt.sign(
             payload,
             keys.secretOrKey,
             { expiresIn: 3600 },
+            // token will expire in an hour - user will have to log in again
+
+            //.sign takes callback if the action is asynchronous - calls the function with either an error or the generated JWT
             (err, token) => {
               res.json({
                 success: true,
                 token: 'Bearer ' + token
+                // adds the bearer scheme header
               })
             })
-          // token will expire in an hour - user will have to log in again
         } else {
           return res.status(400).json({password: 'password incorrect'})
         }
     })
+  })
+})
+
+// @route   GET api/users/current
+// @desc    return current user
+// @access  Private
+router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
+  //passport.authenticate takes the strategy thats to be used as the first param and applies it to that route - route is now protected
+  // the supplied callback is used if the authentication strategy passed successfully - req.user will contain the authenticated users
+  // by default if authentication strategy fails - 401 Unauthorized status returned
+  res.json({
+    id: req.user.id,
+    name: req.user.name,
+    email: req.user.email
   })
 })
 

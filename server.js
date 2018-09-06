@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
+const passport = require('passport')
 
 const users = require('./routes/api/users.js')
 const profile = require('./routes/api/profile.js')
@@ -20,7 +21,14 @@ mongoose.connect(db)
 .then(() => console.log('MongoDB Connected'))
 .catch(err => console.log(err))
 
-app.get('/', (req, res) => res.send('hello world!'))
+// app.get('/', (req, res) => res.send('hello world!'))
+
+// passport middleware
+app.use(passport.initialize())
+//everything that is done in passport is done in a 'strategy' i.e. here it will be a JWT strategy defined in a config file
+// passport config:
+require('./config/passport')(passport)
+// requiring the file where strategy is defined and passing in passport itself to that file
 
 //use routes
 app.use('/api/users', users)
