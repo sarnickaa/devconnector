@@ -36,6 +36,69 @@ router.get('/', passport.authenticate('jwt', { session: false}), (req, res) => {
   .catch(err => res.status(404).json(err))
 })
 
+// @route   GET api/profile/all
+// @desc    GET all profiles
+// @access  PUBLIC - anyone can see profiles
+router.get('/all', (req, res) => {
+  const errors = {}
+
+  Profile.find()
+  .populate('user', ['name', 'avatar'])
+  .then(profiles => {
+    if(!profiles) {
+      errors.noprofile = 'there there are no profiles'
+      return res.status(404).json(errors)
+    }
+    res.json(profiles)
+})
+  .catch(err =>
+    res.status(404).json({ profile: 'there are no profiles'})
+  )
+})
+
+// @route   GET api/profile/handle/:handle (nb handle word will not be in front end URL)
+// @desc    get profile by handle
+// @access  PUBLIC - anyone can see profiles
+router.get('/handle/:handle', (req, res) => {
+  const errors = {}
+
+  Profile.findOne({ handle: req.params.handle })
+  //req.params.handle will match whatever :handle is in the URL
+  .populate('user', ['name', 'avatar'])
+  .then(profile => {
+    if(!profile) {
+      errors.noprofile = 'there is no profile for this user'
+      // send error once created
+      res.status(404).json(errors)
+    }
+
+    res.json(profile)
+  })
+  .catch(err => res.status(404).json(err))
+})
+
+// @route   GET api/profile/user/:user_id get profile by userID
+// @desc    get profile by user id
+// @access  PUBLIC - anyone can see profiles
+router.get('/user/:user_id', (req, res) => {
+  const errors = {}
+
+  Profile.findOne({ user: req.params.user_id })
+  //req.params.handle will match whatever :handle is in the URL
+  .populate('user', ['name', 'avatar'])
+  .then(profile => {
+    if(!profile) {
+      errors.noprofile = 'there is no profile for this user'
+      // send error once created
+      res.status(404).json(errors)
+    }
+
+    res.json(profile)
+  })
+  .catch(err => res.status(404).json({profile: 'there is no profile for this user'}))
+  // if an error occurs with the id i.e. wrong id - the .catch() error will be sent in this case rather than in th handle - where the custom error shows
+})
+
 // @route   POST api/profile
 // @desc    create or edit user profile
 // @access  Private - must be logged in as route depends on token
