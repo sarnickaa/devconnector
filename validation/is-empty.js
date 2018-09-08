@@ -7,6 +7,7 @@ const isEmpty = value => {
     (typeof value === 'string' && value.trim().length === 0)
     //checks for empty string
   )
+  // function will return TRUE for these conditions - thus - is used with the ! operator in the ternary i.e. if value is NOT undefined or null...will  remain. IF undefined/null - will be set to ''
 }
 
 module.exports = isEmpty

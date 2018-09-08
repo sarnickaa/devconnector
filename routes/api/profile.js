@@ -3,6 +3,9 @@ const router = express.Router()
 const mongoose = require('mongoose')
 const passport = require('passport')
 
+//load validation
+const validateProfileInput = require('../../validation/profile.js')
+
 //LOAD Profile and User models
 const Profile = require('../../models/Profile.js')
 const User = require('../../models/User.js')
@@ -20,6 +23,7 @@ router.get('/', passport.authenticate('jwt', { session: false}), (req, res) => {
   //fetch current users Profile
   //after login - current user data contained within req.user
   Profile.findOne({ user: req.user.id })
+  .populate('user', ['name', 'avatar'])
   // returns promise
   .then(profile => {
     if(!profile) {
@@ -36,7 +40,15 @@ router.get('/', passport.authenticate('jwt', { session: false}), (req, res) => {
 // @desc    create or edit user profile
 // @access  Private - must be logged in as route depends on token
 router.post('/', passport.authenticate('jwt', { session: false}), (req, res) => {
-  const errors = {}
+  // const errors = {}
+
+  const { errors, isValid } = validateProfileInput(req.body)
+
+  //check validation
+  if(!isValid) {
+    //RETUR ANY ERRORS with 400 status
+    return res.status(400).json(errors)
+  }
 
   //get incoming fields:
   const profileFields = {}
