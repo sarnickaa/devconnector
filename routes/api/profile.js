@@ -5,6 +5,10 @@ const passport = require('passport')
 
 //load validation
 const validateProfileInput = require('../../validation/profile.js')
+const validateExperienceInput = require('../../validation/experience.js')
+const validateEducationInput = require('../../validation/education.js')
+
+
 
 //LOAD Profile and User models
 const Profile = require('../../models/Profile.js')
@@ -167,7 +171,70 @@ router.post('/', passport.authenticate('jwt', { session: false}), (req, res) => 
         })
       }
     })
+})
 
+// @route   POST api/profile/experience
+// @desc    POST experience to experience array
+// @access  PRIVATE
+router.post('/experience', passport.authenticate('jwt', { session: false }), (req, res) => {
+
+  const { errors, isValid } = validateExperienceInput(req.body)
+
+  //check validation
+  if(!isValid) {
+    //RETUR ANY ERRORS with 400 status
+    return res.status(400).json(errors)
+  }
+
+  Profile.findOne({user: req.user.id}) // find by logged in user - user.id comes from the logged in users token
+  .then(profile => {
+    const newExp = {
+      title: req.body.title,
+      company: req.body.company,
+      location: req.body.location,
+      from: req.body.from,
+      to: req.body.to,
+      current: req.body.current,
+      description: req.body.description
+    }
+
+  // add to experience array
+  profile.experience.unshift(newExp)
+  profile.save().then(profile => res.json(profile)) // add the profile to begining of array
+  // will return the profile through the promise
+  })
+})
+
+// @route   POST api/profile/education
+// @desc    POST education to education array
+// @access  PRIVATE
+router.post('/education', passport.authenticate('jwt', { session: false }), (req, res) => {
+
+  const { errors, isValid } = validateEducationInput(req.body)
+
+  //check validation
+  if(!isValid) {
+    //RETUR ANY ERRORS with 400 status
+    return res.status(400).json(errors)
+  }
+
+  Profile.findOne({user: req.user.id}) // find by logged in user - user.id comes from the logged in users token
+  .then(profile => {
+    const newEdu = {
+      school: req.body.school,
+      degree: req.body.degree,
+      fieldofstudy: req.body.fieldofstudy,
+      from: req.body.from,
+      to: req.body.to,
+      current: req.body.current,
+      description: req.body.description
+    }
+
+  // add to experience array
+  profile.education.unshift(newEdu)
+  profile.save().then(profile => res.json(profile)) // add the profile to begining of array, save and return profile
+  // will return the profile through the promise
+  })
 })
 
 module.exports = router
