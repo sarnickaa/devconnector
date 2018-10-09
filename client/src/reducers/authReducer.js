@@ -1,4 +1,4 @@
-import { TEST_DISPATCH } from '../actions/types'
+// import { TEST_DISPATCH } from '../actions/types'
 const initialState = {
   isAuthenticated: false,
   user: {}
@@ -7,15 +7,16 @@ const initialState = {
 //action is an object that includes a type can also send data with it
 export default function(state = initialState, action) {
   switch (action.type) {
-    case TEST_DISPATCH:
-      return {
-        //copy initial state and chage it
-        ...state,
-        // spread the initial state in another object (clone it)
-        user: action.payload
-        //fill user param with payload which is the userData
-        // dispatching to teh reducer the data thats passed in
-      }
+    // case TEST_DISPATCH:
+    //   return {
+    //     //copy initial state and chage it
+    //     ...state,
+    //     // spread the initial state in another object (clone it)
+    //     user: action.payload
+    //     //fill user param with payload which is the userData
+    //     // dispatching to teh reducer the data thats passed in
+    //   }
+ 
       default:
         return state
   }
