@@ -1,4 +1,6 @@
 // import { TEST_DISPATCH } from '../actions/types'
+import isEmpty from '../validation/isEmpty'
+import { SET_CURRENT_USER } from '../actions/types'
 const initialState = {
   isAuthenticated: false,
   user: {}
@@ -16,7 +18,18 @@ export default function(state = initialState, action) {
     //     //fill user param with payload which is the userData
     //     // dispatching to teh reducer the data thats passed in
     //   }
- 
+    case SET_CURRENT_USER:
+      return {
+        ...state,
+        isAuthenticated: !isEmpty(action.payload)
+        //payload passed in is obj with decoded user
+        //check to see that its not empty
+        //if its filled with decoded user - its authenticated if not - no authentication
+        //user is the action payload itself
+        // isEmpty doesn't exist - will be the same function that was defined on the server side
+        // isAuthenticated will depend on wheher the payload is empty or not user will be the actual payload
+        // to log out - can simply call the isEmpty function and pass an empty object - isAuthenticated will be reset to false and user will be empty object
+      }
       default:
         return state
   }
