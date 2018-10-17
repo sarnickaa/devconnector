@@ -154,4 +154,4 @@ errors: state.errors
 })
 
 export default connect(mapStateToProps, { registerUser })(withRouter(Register));
-// second param is an object where you can map your actions
+// second param is the action/object where you can map your actions

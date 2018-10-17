@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import classnames from 'classnames'
+import { loginUser} from '../../actions/authActions'
 
 class Login extends Component {
   constructor() {
@@ -11,6 +15,22 @@ class Login extends Component {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    //check if user is authenticated - action: if user validation passes
+    // action sets token in local localStorage
+    // reducer sets isAuthenticated to true in app state
+    // thus test to see is isAuthenticatedtrue
+
+    if(nextProps.auth.isAuthenticated) {
+      // auth = the state object from the authreducer (established through the reducers index.js file which combines reducers)
+      // if true - redirect to dashboard
+      this.props.history.push('/dashboard')
+    }
+    if(nextProps.errors) {
+      this.setState({ errors: nextProps.errors })
+    }
+  }
+
   onChange = (e) => {
     this.setState({[e.target.name]: e.target.value})
   }
@@ -18,14 +38,19 @@ class Login extends Component {
   onSubmit = (e) => {
     e.preventDefault()
 
-    const loggedInUser = {
+    const userData = {
       email: this.state.email,
       password: this.state.password
     }
-    console.log(loggedInUser)
+
+    //call the reduc action for submit:
+    this.props.loginUser(userData)
   }
 
   render() {
+    const { errors } = this.state
+    //come in as properties from the reducer
+    //use componentWillReceiveProps to map it back to state
     return (
       <div className="login">
         <div className="container">
@@ -38,20 +63,26 @@ class Login extends Component {
                 <div className="form-group">
                   <input
                     type="email"
-                    className="form-control form-control-lg"
+                    className={classnames('form-control form-control-lg', {
+                      'is-invalid': errors.email
+                    })}
                     placeholder="Email Address"
                     name="email"
                     value={this.state.email}
                     onChange={this.onChange}/>
+                    { errors.email && (<div className="invalid-feedback">{errors.email}</div>)}
                 </div>
                 <div className="form-group">
                   <input
                     type="password"
-                    className="form-control form-control-lg"
+                    className={classnames('form-control form-control-lg', {
+                      'is-invalid': errors.password
+                    })}
                     placeholder="Password"
                     name="password"
                     value={this.state.password}
                     onChange={this.onChange} />
+                    { errors.email && (<div className="invalid-feedback">{errors.password}</div>)}
                 </div>
                 <input type="submit" className="btn btn-info btn-block mt-4" />
               </form>
@@ -64,4 +95,15 @@ class Login extends Component {
 
 }
 
-export default Login;
+Login.propTypes = {
+  loginUser: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired
+}
+
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+  errors: state.errors
+})
+
+export default connect(mapStateToProps, { loginUser })(Login); //connecting component to redux, 1st param = mapstatetoprops loginUser is the action we want to call from the actions file

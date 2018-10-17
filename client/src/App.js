@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+import jwt_decode from 'jwt-decode'
+import setAuthToken from './utils/setAuthToken'
+import { setCurrentUser } from './actions/authActions'
 //mimics standard browser - allows you to use back button
 import { Provider } from 'react-redux'
 // react component that provides application with the store that will store app state
@@ -10,6 +13,21 @@ import Landing from './components/layout/Landing'
 import Register from './components/auth/Register'
 import Login from './components/auth/Login'
 import store from './store'
+
+//check for token:
+if(localStorage.jwtToken){
+//set auth token header auth
+setAuthToken(localStorage.jwtToken)
+//takes in token stored in local storage and sets header
+
+//decode token and get user info and expiration = same process as in Login action
+//except checking for this with every page request - now no matter what page you go to - user will always exist in state
+const decoded = jwt_decode(localStorage.jwtToken)
+//call setCurrentUser action - to set user and isAuthenticated
+store.dispatch(setCurrentUser(decoded))
+//can call any action with store.dispatch
+
+}
 
 class App extends Component {
   render() {
