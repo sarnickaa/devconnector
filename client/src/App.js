@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import jwt_decode from 'jwt-decode'
 import setAuthToken from './utils/setAuthToken'
-import { setCurrentUser } from './actions/authActions'
+import { setCurrentUser, logoutUser } from './actions/authActions'
 //mimics standard browser - allows you to use back button
 import { Provider } from 'react-redux'
 // react component that provides application with the store that will store app state
@@ -26,6 +26,17 @@ const decoded = jwt_decode(localStorage.jwtToken)
 //call setCurrentUser action - to set user and isAuthenticated
 store.dispatch(setCurrentUser(decoded))
 //can call any action with store.dispatch
+
+//check for expired TOKEN - logout user and redirect to login page
+  const currentTime = Date.now() / 1000 //miliseconds
+  if(decoded.exp < currentTime) {
+  // logout user
+  store.dispatch(logoutUser())
+  //TODO clear current profile
+
+  //redirect to login
+  window.location.href = '/login'
+}
 
 }
 

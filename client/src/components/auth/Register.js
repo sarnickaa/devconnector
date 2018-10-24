@@ -22,6 +22,12 @@ class Register extends Component {
     // this.onChange = this.onChange.bind(this)
   }
 
+  componentDidMount() {
+  if(this.props.auth.isAuthenticated) {
+    this.props.history.push('/dashboard')
+  }
+}
+
 //test for errors property - to see if component has recieved errors
 // lifecycle method
   componentWillReceiveProps(nextProps) {

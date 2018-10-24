@@ -15,6 +15,14 @@ class Login extends Component {
     }
   }
 
+  //to prevent user being able to access login component when already logged in i.e. by typing /login into address bar
+  //lifecycle method - invoked immediatley after component is mounted (inserted into DOM tree)
+  componentDidMount() {
+  if(this.props.auth.isAuthenticated) {
+    this.props.history.push('/dashboard')
+  }
+}
+
   componentWillReceiveProps(nextProps) {
     //check if user is authenticated - action: if user validation passes
     // action sets token in local localStorage
