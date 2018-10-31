@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom'
 // wrap register component with this when you export it
 
 // import axios from 'axios'
-import classnames from 'classnames'
+// import classnames from 'classnames'
 // allows conditional classes to be applied to elements
 import { connect } from 'react-redux' // connects redux with react components
 import { registerUser } from '../../actions/authActions'//the redux action
@@ -51,7 +51,7 @@ class Register extends Component {
       password2: this.state.password2
     }
     this.props.registerUser(newUser, this.props.history)
-    //any action that are brought in are stored in props - allows access to regiserUser action
+    //any action that are brought in through the connect() redux method at bottom of component -  are stored in props - allows access to regiserUser action
     //because withRouter wraps the register component - able to pass router props i.e. this.props.history to the registerUser action
 
 
@@ -97,7 +97,7 @@ class Register extends Component {
                     {/* invalid-feedback is a bootstrap class for displaying error messages if an imput recieves invalid data */}
                     {/* error message is generated on the back end and sent along with the 400 response */}
                 {/* </div> */}
-                
+
                 <TextFieldGroup
                   placeholder="name"
                   name="name"
